@@ -9,6 +9,7 @@
 #include "SDKmisc.h"
 #include "DXUTMesh.h"
 #include "resource.h"
+#include "DXUTShapes.h"
 
 #pragma warning( disable : 4100 )
 
@@ -104,9 +105,11 @@ HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFAC
   SAFE_RELEASE(pVertexShaderBuffer);
   SAFE_RELEASE(pPixelShaderBuffer);
 
-  // Create models
-  g_pMesh[0] = new DXUTMesh();
-  g_pMesh[0]->CreateBox(pd3dDevice);
+  //// Create models
+  //g_pMesh[0] = new DXUTMesh();
+  //g_pMesh[0]->CreateBox(pd3dDevice);
+  //DXUTCreateTeapot(pd3dDevice, &g_pMesh[0]);
+  DXUTCreateTorus(pd3dDevice, 0.5, 2, 10, 40, &g_pMesh[0]);
   g_vColor[0] = Colors::White;
 
   // Setup constant buffer
