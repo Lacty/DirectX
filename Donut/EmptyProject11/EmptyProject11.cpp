@@ -47,7 +47,7 @@ CONST UINT              g_iCBPSPERFrameBind = 1;
 
 ID3D11Buffer*           g_pcbVSPerObject = nullptr;
 ID3D11Buffer*           g_pcbPSPerObject = nullptr;
-ID3D11Buffer*           g_pcbPSPerFrame  = nullptr;
+ID3D11Buffer*           g_pcbPSPerFrame = nullptr;
 
 //--------------------------------------------------------------------------------------
 // Reject any D3D11 devices that aren't acceptable by returning false
@@ -71,8 +71,7 @@ bool CALLBACK ModifyDeviceSettings(DXUTDeviceSettings* pDeviceSettings, void* pU
 // Create any D3D11 resources that aren't dependant on the back buffer
 //--------------------------------------------------------------------------------------
 HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFACE_DESC* pBackBufferSurfaceDesc,
-                                     void* pUserContext)
-{
+                                     void* pUserContext) {
   HRESULT hr;
 
   DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
@@ -88,19 +87,19 @@ HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFAC
 
   // Create the Shaders
   V_RETURN(pd3dDevice->CreateVertexShader(pVertexShaderBuffer->GetBufferPointer(),
-                                          pVertexShaderBuffer->GetBufferSize(), nullptr, &g_pVertexShader));
+    pVertexShaderBuffer->GetBufferSize(), nullptr, &g_pVertexShader));
   V_RETURN(pd3dDevice->CreatePixelShader(pPixelShaderBuffer->GetBufferPointer(),
-                                         pPixelShaderBuffer->GetBufferSize(), nullptr, &g_pPixelShader));
+    pPixelShaderBuffer->GetBufferSize(), nullptr, &g_pPixelShader));
 
   // Create our vertex input layout
   const D3D11_INPUT_ELEMENT_DESC layout[] = {
-    { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    { "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
   };
 
   V_RETURN(pd3dDevice->CreateInputLayout(layout, ARRAYSIZE(layout),
-                                         pVertexShaderBuffer->GetBufferPointer(),
-                                         pVertexShaderBuffer->GetBufferSize(), &g_pVertexLayout));
+    pVertexShaderBuffer->GetBufferPointer(),
+    pVertexShaderBuffer->GetBufferSize(), &g_pVertexLayout));
 
   SAFE_RELEASE(pVertexShaderBuffer);
   SAFE_RELEASE(pPixelShaderBuffer);
@@ -109,7 +108,7 @@ HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFAC
   //g_pMesh[0] = new DXUTMesh();
   //g_pMesh[0]->CreateBox(pd3dDevice);
   //DXUTCreateTeapot(pd3dDevice, &g_pMesh[0]);
-  DXUTCreateTorus(pd3dDevice, 0.5, 2, 10, 40, &g_pMesh[0]);
+  DXUTCreateTorus(pd3dDevice, 0.2, 0.6, 20, 40, &g_pMesh[0]);
   g_vColor[0] = Colors::White;
 
   // Setup constant buffer
@@ -136,8 +135,7 @@ HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFAC
 // Create any D3D11 resources that depend on the back buffer
 //--------------------------------------------------------------------------------------
 HRESULT CALLBACK OnD3D11ResizedSwapChain(ID3D11Device* pd3dDevice, IDXGISwapChain* pSwapChain,
-                                         const DXGI_SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext)
-{
+                                         const DXGI_SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext) {
   float fAspectRaito = pBackBufferSurfaceDesc->Width / (FLOAT) pBackBufferSurfaceDesc->Height;
 
   g_mProj = XMMatrixPerspectiveFovLH(XM_PI / 4, fAspectRaito, 2.0f, 2000.0f);
@@ -154,9 +152,8 @@ HRESULT CALLBACK OnD3D11ResizedSwapChain(ID3D11Device* pd3dDevice, IDXGISwapChai
 //--------------------------------------------------------------------------------------
 // Handle updates to the scene.  This is called regardless of which D3D API is used
 //--------------------------------------------------------------------------------------
-void CALLBACK OnFrameMove(double fTime, float fElapsedTime, void* pUserContext)
-{
-  g_mWorld[0] = XMMatrixRotationY(static_cast<float>(fTime) * XM_PI) * XMMatrixTranslation(0, 0, 0);
+void CALLBACK OnFrameMove(double fTime, float fElapsedTime, void* pUserContext) {
+  g_mWorld[0] = /*XMMatrixRotationY(static_cast<float>(fTime) * XM_PI) * */XMMatrixTranslation(0, 0, 0);
 }
 
 
@@ -175,7 +172,7 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* pd3dDevice, ID3D11DeviceContext* 
   pd3dImmediateContext->ClearDepthStencilView(pDSV, D3D11_CLEAR_DEPTH, 1.0, 0);
 
   // Get the light direction
-  static const XMVECTORF32 s_vLightDir = {-1.f, 1, -1.f, 0.f};
+  static const XMVECTORF32 s_vLightDir = { -1.f, 1, -1.f, 0.f };
   XMVECTOR vLightDir = XMVector3Normalize(s_vLightDir);
 
   // Per frame cd update
@@ -197,28 +194,47 @@ void CALLBACK OnD3D11FrameRender(ID3D11Device* pd3dDevice, ID3D11DeviceContext* 
   pd3dImmediateContext->PSSetShader(g_pPixelShader, nullptr, 0);
 
   for (int i = 0; i < 1; ++i) {
-    // Set the per object constant data
-    XMMATRIX mWorldViewProjection = g_mWorld[i] * g_mView * g_mProj;
+    for (int y = -4; y < 5; ++y) {
+      for (int x = -4; x < 5; ++x) {
+        if ((x % 2 == 0) || (y % 2 == 0)) {
+          XMFLOAT3 position = XMFLOAT3(x, y, 0);
+          g_mWorld[i] = XMMatrixTranslation(position.x, position.y, position.z);
+          g_mWorld[i] = XMMatrixRotationX(XM_PI / 2 * (x % 2)) *
+            XMMatrixRotationY(XM_PI / 2 * (y % 2)) *
+            XMMatrixTranslation(position.x, position.y, position.z);
 
-    // VS Per Object
-    V(pd3dImmediateContext->Map(g_pcbVSPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
-    auto pVSPerObject = reinterpret_cast<CB_VS_PER_OBJECT*>(MappedResource.pData);
-    XMStoreFloat4x4(&pVSPerObject->m_WorldViewProj, XMMatrixTranspose(mWorldViewProjection));
-    XMStoreFloat4x4(&pVSPerObject->m_World, XMMatrixTranspose(g_mWorld[i]));
-    pd3dImmediateContext->Unmap(g_pcbVSPerObject, 0);
+          XMFLOAT4 color = XMFLOAT4(0, 0, 0, 1);
+          color = XMFLOAT4(0.5f + ((x + 4) / 9.0f),
+                           0.5f + ((y + 4) / 9.0f),
+                           1.0f - ((x + 4) + (y + 4)) / 18.0f,
+                           1);
 
-    pd3dImmediateContext->VSSetConstantBuffers(g_iCBVSPerObjectBind, 1, &g_pcbVSPerObject);
+          // Set the per object constant data
+          XMMATRIX mWorldViewProjection = g_mWorld[i] * g_mView * g_mProj;
 
-    // PS Per Object
-    V(pd3dImmediateContext->Map(g_pcbPSPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
-    auto pPSPerObject = reinterpret_cast<CB_PS_PER_OBJECT*>(MappedResource.pData);
-    XMStoreFloat4(&pPSPerObject->m_vOjectColor, g_vColor[i]);
-    pd3dImmediateContext->Unmap(g_pcbPSPerObject, 0);
+          // VS Per Object
+          V(pd3dImmediateContext->Map(g_pcbVSPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
+          auto pVSPerObject = reinterpret_cast<CB_VS_PER_OBJECT*>(MappedResource.pData);
+          XMStoreFloat4x4(&pVSPerObject->m_WorldViewProj, XMMatrixTranspose(mWorldViewProjection));
+          XMStoreFloat4x4(&pVSPerObject->m_World, XMMatrixTranspose(g_mWorld[i]));
+          pd3dImmediateContext->Unmap(g_pcbVSPerObject, 0);
 
-    pd3dImmediateContext->PSSetConstantBuffers(g_iCBPSPerObjectBind, 1, &g_pcbPSPerObject);
+          pd3dImmediateContext->VSSetConstantBuffers(g_iCBVSPerObjectBind, 1, &g_pcbVSPerObject);
 
-    // render mesh
-    g_pMesh[i]->Draw(pd3dImmediateContext);
+          // PS Per Object
+          V(pd3dImmediateContext->Map(g_pcbPSPerObject, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource));
+          auto pPSPerObject = reinterpret_cast<CB_PS_PER_OBJECT*>(MappedResource.pData);
+          //XMStoreFloat4(&pPSPerObject->m_vOjectColor, g_vColor[i]);
+          pPSPerObject->m_vOjectColor = color;
+          pd3dImmediateContext->Unmap(g_pcbPSPerObject, 0);
+
+          pd3dImmediateContext->PSSetConstantBuffers(g_iCBPSPerObjectBind, 1, &g_pcbPSPerObject);
+
+          // render mesh
+          g_pMesh[i]->Draw(pd3dImmediateContext);
+        }
+      }
+    }
   }
 }
 
